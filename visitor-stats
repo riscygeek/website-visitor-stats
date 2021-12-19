@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+logfile="/var/log/nginx/access.log"
+countryfile="/usr/local/share/countrycodes.csv"
+outfile="/var/www/stuerz.xyz/visitor-stats.html"
+delay="3600"
+
+get_cc() {
+   curl "https://ipinfo.io/$1" 2>/dev/null               \
+      | grep 'country'                                   \
+      | sed 's/^\s*"country":\s*"\([A-Z]\+\)",\s*$/\1/'
+}
+
+get_country() {
+   local tmp
+   tmp="$(grep '^\("[^"]\+"\|[^,]\+\),'"$1," "${countryfile}")"
+   #tmp="$(grep "^\(\"[^\"]\+\"\|[^,]\+\),$1," "${countryfile}")"
+   if [[ ${tmp} =~ ^\" ]]; then
+      sed 's/^"\([^"]\+\)".*/\1/' <<< "${tmp}"
+   else
+      sed 's/^\([^,]\+\),.*/\1/' <<<"${tmp}"
+   fi
+}
+
+get_ips() {
+   grep -Eo '^([0-9]+(\.[0-9]+){3}|[0-9a-fA-F]+(:+[0-9a-fA-F]+)*)' "${logfile}" | sort | uniq
+}
+
+declare -A countries
+while true; do
+   countries=()
+   total=0
+   ips="$(get_ips)"
+
+   while read -r line; do
+      cc="$(get_cc "${line}")"
+      countries[${cc}]=$(( ${countries[$cc]} + 1 ))
+      total=$((total + 1))
+   done <<<"${ips}"
+   
+   echo "Total: ${total}" >"${outfile}"
+   for cc in "${!countries[@]}"; do
+      echo "<br>" >>"${outfile}"
+      echo "$(get_country "${cc}"): ${countries[${cc}]}" >>"${outfile}"
+   done
+
+   sleep "${delay}"
+done

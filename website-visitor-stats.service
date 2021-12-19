@@ -1,0 +1,11 @@
+[Unit]
+Description=Visitor Stats for stuerz.xyz
+After=nginx.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/local/bin/visitor-stats
+
+[Install]
+WantedBy=multi-user.target
