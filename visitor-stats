@@ -28,6 +28,7 @@ get_ips() {
 
 declare -A countries
 while true; do
+   echo "Updating..." >&2
    countries=()
    total=0
    ips="$(get_ips)"
