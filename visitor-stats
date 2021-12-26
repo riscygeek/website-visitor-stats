@@ -34,6 +34,7 @@ while true; do
 
    while read -r line; do
       cc="$(get_cc "${line}")"
+      [[ ${cc} ]] || continue
       countries[${cc}]=$(( ${countries[$cc]} + 1 ))
       total=$((total + 1))
    done <<<"${ips}"
