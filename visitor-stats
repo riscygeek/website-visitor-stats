@@ -40,7 +40,7 @@ while true; do
       total=$((total + 1))
    done <<<"${ips}"
    
-   echo "Total: ${total}" >"${outfile}"
+   echo "Total: ${total} (Last Updated $(date))" >"${outfile}"
    for cc in "${!countries[@]}"; do
       echo "<br>" >>"${outfile}"
       echo "$(get_country "${cc}"): ${countries[${cc}]}" >>"${outfile}"
